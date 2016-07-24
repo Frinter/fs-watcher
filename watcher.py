@@ -11,7 +11,7 @@ class FSCommandRunningEventHandler(FileSystemEventHandler):
 
     def on_any_event(self, event):
         print event
-        command()
+        self.command()
 
 def getRunCommand(command):
     def internalRun():

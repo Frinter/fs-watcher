@@ -18,14 +18,32 @@ def getRunCommand(command):
         os.system(command)
     return internalRun
 
+
 if __name__ == '__main__':
-    index = 1
-    command = getRunCommand(' '.join(sys.argv[index:]))
+    parameterMap = {
+        'd': 'path'
+    }
+
+    def parseArgs(args):
+        index = 0
+        parameters = {}
+        while args[index][0] == '-':
+            parameters[parameterMap[args[index][1]]] = args[index+1]
+            index += 2
+
+        parameters['command'] = ' '.join(args[index:])
+        return parameters
+
+    parameters = parseArgs(sys.argv[1:])
+    path = parameters['path'] if 'path' in parameters else '.'
+    command = getRunCommand(parameters['command'])
     doCommandSoon = debounce(command, 0.01)
+
+    print "Watching path ", path
     eventHandler = FSCommandRunningEventHandler(doCommandSoon)
 
     observer = Observer()
-    observer.schedule(eventHandler, '.', recursive=True)
+    observer.schedule(eventHandler, path, recursive=True)
     observer.start()
 
     try:

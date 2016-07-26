@@ -25,36 +25,11 @@ def getRunCommand(command):
 if __name__ == '__main__':
     basePath = os.getcwd()
 
-    def getParameters(parameterMap, defaults, arguments):
-        def parseArgs(args):
-            index = 0
-            parameters = {}
-            while args[index][0] == '-':
-                parameters[parameterMap[args[index]]] = args[index+1]
-                index += 2
-
-            parameters['rest'] = ' '.join(args[index:])
-            return parameters
-
-        suppliedParameters = parseArgs(arguments)
-        parameters = {
-            'rest': suppliedParameters['rest']
-        }
-
-        for (key, value) in defaultParameters.items():
-            parameters[key] = suppliedParameters[key] if key in suppliedParameters else defaultParameters[key]
-
-        return parameters
-
-    parameterMap = {
-        '-d': 'path',
-        '-w': 'watch',
-        '-i': 'ignore'
-    }
-
-    defaultParameters = {
+    parameters = {
         'path': basePath,
-        'watch': '*',
+        'watch': [
+            #os.path.join(basePath, '*'),
+        ],
         'ignore': [
             os.path.join(basePath, '.git', '*'),
             os.path.join(basePath, '.#*'),
@@ -62,11 +37,30 @@ if __name__ == '__main__':
         ]
     }
 
-    parameters = getParameters(parameterMap, defaultParameters, sys.argv[1:])
+    def parseArgs(args):
+        index = 0
+        while args[index][0] == '-':
+            if args[index] == '-d':
+                parameters['path'] = args[index+1]
+                index += 1
+            elif args[index] == '-w':
+                parameters['watch'].append(args[index+1])
+                index += 1
+            elif args[index] == '-i':
+                parameters['ignore'].append(args[index+1])
+                index += 1
+            index += 1
+
+        parameters['rest'] = ' '.join(args[index:])
+
+    parseArgs(sys.argv[1:])
+
     command = getRunCommand(parameters['rest'])
     doCommandSoon = debounce(command, 0.05)
 
-    print "Watching path ", parameters['path'], ", Ignoring patterns", parameters['ignore']
+    print "Watching path", parameters['path']
+    print "Patterns", parameters['watch']
+    print "Ignoring patterns", parameters['ignore']
     print "Will run command \"" + parameters['rest'] + "\""
     eventHandler = CommandRunningEventHandler(doCommandSoon, parameters['watch'], parameters['ignore'])
 

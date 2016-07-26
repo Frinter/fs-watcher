@@ -28,7 +28,6 @@ if __name__ == '__main__':
     parameters = {
         'path': basePath,
         'watch': [
-            #os.path.join(basePath, '*'),
         ],
         'ignore': [
             os.path.join(basePath, '.git', '*'),

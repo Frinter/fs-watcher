@@ -15,7 +15,6 @@ class CommandRunningEventHandler(PatternMatchingEventHandler):
         self.command = command
 
     def on_any_event(self, event):
-        print event
         self.command()
 
 def getRunCommand(command):
@@ -24,12 +23,14 @@ def getRunCommand(command):
     return internalRun
 
 if __name__ == '__main__':
+    basePath = os.getcwd()
+
     def getParameters(parameterMap, defaults, arguments):
         def parseArgs(args):
             index = 0
             parameters = {}
             while args[index][0] == '-':
-                parameters[parameterMap[args[index][1]]] = args[index+1]
+                parameters[parameterMap[args[index]]] = args[index+1]
                 index += 2
 
             parameters['rest'] = ' '.join(args[index:])
@@ -46,15 +47,19 @@ if __name__ == '__main__':
         return parameters
 
     parameterMap = {
-        'd': 'path',
-        'w': 'watch',
-        'i': 'ignore'
+        '-d': 'path',
+        '-w': 'watch',
+        '-i': 'ignore'
     }
 
     defaultParameters = {
-        'path': '.',
+        'path': basePath,
         'watch': '*',
-        'ignore': [os.path.join('.', '.git', '*'), os.path.join('.', '.#*'), os.path.join('.', '*', '.#*')]
+        'ignore': [
+            os.path.join(basePath, '.git', '*'),
+            os.path.join(basePath, '.#*'),
+            os.path.join(basePath, '*', '.#*')
+        ]
     }
 
     parameters = getParameters(parameterMap, defaultParameters, sys.argv[1:])
